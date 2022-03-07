@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  dsccheckinbot:
+    image: dsc/checkinbot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - TOKEN=<BOT_TOKEN>
+      - ADMIN_ROLE=Moderator
+      - CHANNEL=<LISTENING_CHANNEL>
+      - ADMIN_ID=<SUPER_USER>
+    
+    volumes:
+      - ./database:/Bot/database
+    restart: always
