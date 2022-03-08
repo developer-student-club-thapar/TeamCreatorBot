@@ -22,31 +22,31 @@ class Team(commands.Cog):
     def getRoles(self, message):
         roles = {}
         for role in message.guild.roles:
-            if role.name.startswith("team-"):
+            if role.name.startswith("dv-"):
                 roles[role.name] = role
         return roles
     
     def getRoleAuthorReaction(self, reaction):
         for role in reaction.message.author.roles:
-            if role.name.startswith("team-"):
+            if role.name.startswith("dv-"):
                 return role
         return None
     def getAuthorRoles(self, message):
         roles = []
         for role in message.author.roles:
-            if role.name.startswith("team-"):
+            if role.name.startswith("dv-"):
                 return role
     def getMemberRoles(self, member):
         roles = []
         for role in member.roles:
-            if role.name.startswith("team-"):
+            if role.name.startswith("dv-"):
                 roles.append(role)
         return roles
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        # check if the message starts with team-
-        if message.content.startswith("team-") and len(message.mentions) > 0:
+        # check if the message starts with dv-
+        if message.content.startswith("dv-") and len(message.mentions) > 0:
             # team name
             print("here")
             team_name = message.content.split(" ")[0].replace(" ", "")
@@ -201,18 +201,18 @@ class Team(commands.Cog):
         author_id = ctx.author.id
         # author authorised
         if author_id == int(os.environ["ADMIN_ID"]):
-            # remove all roles with prefix "team-"
+            # remove all roles with prefix "dv-"
             roles_count = 0
             for role in ctx.guild.roles:
                 print("role")
-                if role.name.startswith("team-"):
+                if role.name.startswith("dv-"):
                     print(role.name)
                     roles_count = roles_count + 1
                     await role.delete()
-            # remove all channels with prefix "team-"
+            # remove all channels with prefix "dv-"
             channels_count = 0
             for channel in ctx.guild.channels:
-                if channel.name.startswith("team-"):
+                if channel.name.startswith("dv-"):
                     print(channel.name)
                     channels_count = channels_count + 1
                     await channel.delete()
