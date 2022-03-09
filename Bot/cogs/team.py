@@ -1,3 +1,4 @@
+from sqlalchemy import true
 from discord.ext import commands
 import os
 import discord
@@ -46,44 +47,61 @@ class Team(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         # check if the message starts with dv-
-        if message.content.startswith("dv-") and len(message.mentions) > 0:
-            # team name
-            print("here")
-            team_name = message.content.split(" ")[0].replace(" ", "")
-            # get all roles
-            teams = self.getRoles(message)
-            if team_name in teams:
-                # embed
-                embed = discord.Embed(
-                    title="Error",
-                    description="Team already exists!",
-                    color=0xFF0000
-                )
-                await message.reply(embed=embed)
-                return
-            # check if any mentions are already in a team
-            for member in message.mentions:
-                if self.getMemberRoles(member):
+        if message.channel.id == self.channel_id:
+            if (message.content.startswith("dv-") and len(message.mentions) > 0):
+                # team name
+                print("here")
+                team_name = message.content.split(" ")[0].replace(" ", "")
+                # get all roles
+                teams = self.getRoles(message)
+                if team_name in teams:
                     # embed
                     embed = discord.Embed(
                         title="Error",
-                        description="{} is already in a team!".format(member.display_name),
+                        description="Team already exists!",
                         color=0xFF0000
                     )
                     await message.reply(embed=embed)
                     return
-            # check if the author has a team
-            if self.getAuthorRoles(message):
-                # embed
-                embed = discord.Embed(
-                    title="Error",
-                    description="You are already in a team!",
-                    color=0xFF0000
-                )
-                await message.reply(embed=embed)
-                return
-            # create a reaction button on the message
-            await message.add_reaction("\U0001F44D")
+                # check if any mentions are already in a team
+                for member in message.mentions:
+                    if self.getMemberRoles(member):
+                        # embed
+                        embed = discord.Embed(
+                            title="Error",
+                            description="{} is already in a team!".format(member.display_name),
+                            color=0xFF0000
+                        )
+                        await message.reply(embed=embed)
+                        return
+                # check if the author has a team
+                if self.getAuthorRoles(message):
+                    # embed
+                    embed = discord.Embed(
+                        title="Error",
+                        description="You are already in a team!",
+                        color=0xFF0000
+                    )
+                    await message.reply(embed=embed)
+                    return
+                # create a reaction button on the message
+                await message.add_reaction("\U0001F44D")
+            else:
+                # check if message is reaction
+                if message.author.id == self.bot.user.id:
+                    return
+                else:
+                    # message delete
+                    await message.delete()
+                    # embed
+                    # 950436316728946688 mention this channel
+                    embed = discord.Embed(
+                        title="Spam Error",
+                        description="To find a team explore the <#950436316728946688> channel! Please use ```dv-<TeamName> @member1 @member2``` to create a team.",
+                        color=0xFF0000
+                    )
+                    await message.channel.send(embed=embed)
+
     
 
     # when a reaction is clicked
@@ -91,7 +109,15 @@ class Team(commands.Cog):
     async def on_reaction_add(self, reaction, user):
         db = SessionLocal()
         # print the message if the reaction added is not the bot
-        if user != self.bot.user:
+        # check if user is a Moderator
+        isMod = False
+        for role in user.roles:
+            if role.name == self.admin_role or role.name == "Core 😎" or role.name == "Core 2nd Yr 😎":
+                isMod = True
+                break
+            else:
+                isMod = False
+        if user != self.bot.user and isMod == True:
             # check if user is in the db
             if db.query(models.Member).filter(models.Member.user_id == user.id).first():
                 # already in a team 
@@ -191,9 +217,6 @@ class Team(commands.Cog):
                 color=0x00FF00
             )
             await reaction.message.reply(embed=embed)
-
-
-
 
     @commands.command(name="reset", aliases=["r"])
     async def reset(self, ctx):
