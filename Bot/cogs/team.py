@@ -111,15 +111,20 @@ class Team(commands.Cog):
         # print the message if the reaction added is not the bot
         # check if user is a Moderator
         isMod = False
+
+        # get roles of the user
         for role in user.roles:
             if role.name == self.admin_role or role.name == "Core 😎" or role.name == "Core 2nd Yr 😎":
                 isMod = True
                 break
             else:
                 isMod = False
-        if user != self.bot.user and isMod == True:
+        
+        # make sure the user is authorised and channel is from the one and only channel
+        if user != self.bot.user and isMod == True and reaction.message.channel.id == self.channel_id:
             # check if user is in the db
-            if db.query(models.Member).filter(models.Member.user_id == user.id).first():
+            # author id of message
+            if db.query(models.Member).filter(models.Member.user_id == reaction.message.author.id).first():
                 # already in a team 
                 embed = discord.Embed(
                     title="Error",
