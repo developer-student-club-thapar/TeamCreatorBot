@@ -146,7 +146,8 @@ class Team(commands.Cog):
                     return
             
             # get the team role
-            team_name = reaction.message.content.split(" ")[0].replace(" ", "")
+            team_name = reaction.message.content.replace(" ", "").split("<")[0]
+            print(team_name)
             # get the author of the message
             author = reaction.message.author
             # create a role
