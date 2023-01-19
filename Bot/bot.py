@@ -9,7 +9,7 @@ models.Base.metadata.create_all(bind=engine)
 
 token = ''
 
-prefix = "^"
+prefix = ")"
 
 bot = commands.Bot(command_prefix=prefix)
 
@@ -24,8 +24,14 @@ cogs = ["cogs.team"]
 for cog in cogs:
     bot.load_extension(cog)
 
-# command
-@bot.command(command="channel")
-async def channel(ctx):
-    print(ctx.channel.id)
-bot.run(token)
+# create a command
+@bot.command()
+async def ping(ctx):
+    await ctx.send(f"Pong! {round(bot.latency * 1000)}ms")
+if __name__ == '__main__':
+    try:
+        print("Running!")
+        bot.run(token)
+    except:
+        print('Invalid Token')
+        exit(1)
