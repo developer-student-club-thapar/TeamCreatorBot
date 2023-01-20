@@ -19,7 +19,7 @@ except:
     print("Token not found")
     exit()
 
-cogs = ["cogs.team"]
+cogs = ["cogs.team", "cogs.killscript"]
 
 for cog in cogs:
     bot.load_extension(cog)
