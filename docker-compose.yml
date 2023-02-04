@@ -8,10 +8,8 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - TOKEN=<BOT_TOKEN>
-      - ADMIN_ROLE=Moderator
-      - CHANNEL=<LISTENING_CHANNEL>
-      - ADMIN_ID=<SUPER_USER>
-    
+      - ADMIN_ROLE=moderator
+
     volumes:
       - ./database:/Bot/database
     restart: always
