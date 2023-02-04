@@ -1,17 +1,47 @@
 import discord
 from discord.ext import commands
-import os
-import models
 from database import SessionLocal, engine
-
-db = SessionLocal()
-models.Base.metadata.create_all(bind=engine)
+import models
+import os
 
 token = ''
 
-prefix = ")"
 
-bot = commands.Bot(command_prefix=prefix)
+class TeamCreator(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.members = True
+        intents.messages = True
+
+        super().__init__(
+            command_prefix=commands.when_mentioned,
+            intents=intents
+        )
+
+    async def setup_hook(self) -> None:
+        extensions = [
+            "cogs.team",
+        ]
+
+        for cog in extensions:
+            await self.load_extension(cog)
+
+        await self.tree.sync()
+        commands = await self.tree.fetch_commands()
+        [print(command.name) for command in commands]
+
+    async def on_ready(self) -> None:
+        print('Logged in as', self.user)
+
+    async def on_command_error(self, ctx, error):
+        embed = discord.Embed(
+            title='Error',
+            description=f'{error}',
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
+        print(error)
+
 
 try:
     token = os.environ["TOKEN"]
@@ -19,19 +49,10 @@ except:
     print("Token not found")
     exit()
 
-cogs = ["cogs.team", "cogs.killscript"]
-
-for cog in cogs:
-    bot.load_extension(cog)
-
-# create a command
-@bot.command()
-async def ping(ctx):
-    await ctx.send(f"Pong! {round(bot.latency * 1000)}ms")
 if __name__ == '__main__':
-    try:
-        print("Running!")
-        bot.run(token)
-    except:
-        print('Invalid Token')
-        exit(1)
+    db = SessionLocal()
+    models.Base.metadata.create_all(bind=engine)
+
+    print("Running!")
+    bot = TeamCreator()
+    bot.run(token)

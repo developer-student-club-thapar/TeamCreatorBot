@@ -4,8 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+aiohttp = "==3.7.4.post0"
+async-timeout = "==3.0.1"
+attrs = "==21.4.0"
+chardet = "==4.0.0"
+idna = "==3.3"
+multidict = "==6.0.2"
+typing-extensions = "==4.0.1"
+yarl = "==1.7.2"
+sqlalchemy = "==1.4.31"
+"discord.py" = "*"
 
 [dev-packages]
+autopep8 = "*"
 
 [requires]
 python_version = "3.9"

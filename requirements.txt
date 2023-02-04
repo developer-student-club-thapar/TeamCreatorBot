@@ -1,11 +1,13 @@
 aiohttp==3.7.4.post0
 async-timeout==3.0.1
 attrs==21.4.0
+autopep8==2.0.1
 chardet==4.0.0
-discord==1.7.3
-discord.py==1.7.3
+discord.py==2.1.0
 idna==3.3
 multidict==6.0.2
+pycodestyle==2.10.0
+SQLAlchemy==1.4.31
+tomli==2.0.1
 typing_extensions==4.0.1
 yarl==1.7.2
-SQLAlchemy==1.4.31
