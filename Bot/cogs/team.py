@@ -4,13 +4,13 @@ import discord
 from database import SessionLocal
 import models
 
-admin_role = os.environ["ADMIN_ROLE"]
+admin_role = os.environ["ADMIN_ROLE_ID"]
 
 
 class Team(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.role_name = "hacktu"
+        self.role_name = os.environ['ROLE_NAME']
 
     @commands.hybrid_command(name="create", description="Create a team!", with_app_command=True)
     async def create(self, ctx: commands.Context, team_name: str, members: commands.Greedy[discord.Member]) -> None:
@@ -67,9 +67,12 @@ class Team(commands.Cog):
             db.add(member)
             db.commit()
 
+        admin = ctx.guild.get_role(int(admin_role))
+
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False),
-            role: discord.PermissionOverwrite(read_messages=True)
+            role: discord.PermissionOverwrite(read_messages=True),
+            admin: discord.PermissionOverwrite(read_messages=True)
         }
 
         # create team category in the guild
@@ -90,10 +93,19 @@ class Team(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="remove", description="Remove a team", with_app_command=True)
-    @commands.has_role(admin_role)
     async def remove(self, ctx: commands.Context, team_name: str) -> None:
         team_name = team_name.lower()
         team_name = team_name.replace(" ", "-")
+
+        if not ctx.author.get_role(int(admin_role)):
+            embed = discord.Embed(
+                title='Error',
+                description='You do not have permission to use this command!',
+                color=discord.Color.red()
+            )
+            print(f'{ctx.author.display_name} tried to reset teams')
+            await ctx.send(embed=embed)
+            return
 
         print(f'Removing team {team_name}')
         embed = discord.Embed(
@@ -130,8 +142,18 @@ class Team(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="reset", description="Reset all teams", with_app_command=True)
-    @commands.has_role(admin_role)
     async def reset(self, ctx: commands.Context) -> None:
+        # check if author has role with id admin_role
+        if not ctx.author.get_role(int(admin_role)):
+            embed = discord.Embed(
+                title='Error',
+                description='You do not have permission to use this command!',
+                color=discord.Color.red()
+            )
+            print(f'{ctx.author.display_name} tried to reset teams')
+            await ctx.send(embed=embed)
+            return
+
         db = SessionLocal()
         db.query(models.Member).delete()
         db.query(models.Team).delete()
@@ -145,13 +167,18 @@ class Team(commands.Cog):
         await ctx.send(embed=embed)
         print('Resetting teams')
 
-        # remove all roles
+        # get all team names from database
+        team_names = []
+        for team in db.query(models.Team).all():
+            team_names.append(team.name)
+
         roles_count = 0
+        # remove all roles
         for role in ctx.guild.roles:
-            if role.name.startswith(self.role_name + '-'):
+            if role.name.startswith(self.role_name + '-') and role.name.split('-')[1] in team_names:
                 print(role.name)
-                roles_count = roles_count + 1
                 await role.delete()
+                roles_count += 1
 
         # remove all channels
         for channel in ctx.guild.channels:
